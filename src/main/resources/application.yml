@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: groceryapi
+  datasource:
+    url: jdbc:mysql://host.docker.internal:3306/grocery_booking?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    show-sql: true

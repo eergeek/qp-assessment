@@ -14,4 +14,12 @@ public class Order {
 
     @ManyToMany
     private List<GroceryItem> groceryItems;
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setGroceryItems(List<GroceryItem> groceryItems) {
+        this.groceryItems = groceryItems;
+    }
 }
