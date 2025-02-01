@@ -3,8 +3,10 @@ package com.qpro.groceryapi.controller;
 import com.qpro.groceryapi.model.GroceryItem;
 import com.qpro.groceryapi.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -15,14 +17,15 @@ public class AdminControls {
 
     // view all
     @GetMapping("/items")
-    public List<GroceryItem> viewAllItems() {
-        return adminService.getAllGroceryItems();
+    public ResponseEntity<List<GroceryItem>> viewAllItems() {
+        return ResponseEntity.ok(adminService.getAllGroceryItems());
     }
 
     // add
     @PostMapping("items")
-    public GroceryItem addItem(@RequestBody GroceryItem groceryItem) {
-        return adminService.addGroceryItem(groceryItem);
+    public ResponseEntity<GroceryItem> addItem(@RequestBody GroceryItem groceryItem) {
+        GroceryItem addedItem = adminService.addGroceryItem(groceryItem);
+        return ResponseEntity.created(URI.create("/items")).body(addedItem);
     }
 
     // remove

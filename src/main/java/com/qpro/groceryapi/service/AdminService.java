@@ -26,7 +26,7 @@ public class AdminService {
     }
 
     public GroceryItem updateGroceryItem(Long id, GroceryItem updatedItem) {
-        updatedItem.setId(id);
+        updatedItem.setGroceryId(id);
         return groceryItemRepository.save(updatedItem);
     }
 

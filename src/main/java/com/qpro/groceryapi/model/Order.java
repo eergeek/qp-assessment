@@ -7,19 +7,12 @@ import java.util.List;
 
 @Data
 @Entity
+@Table(name = "grocery_order")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long orderId;
 
     @ManyToMany
     private List<GroceryItem> groceryItems;
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setGroceryItems(List<GroceryItem> groceryItems) {
-        this.groceryItems = groceryItems;
-    }
 }
