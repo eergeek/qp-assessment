@@ -1,6 +1,7 @@
 package com.qpro.groceryapi;
 
 import com.qpro.groceryapi.model.Inventory;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -20,7 +21,7 @@ import java.util.Objects;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class GroceryapiApplicationTests {
+class AdminActionsTest {
     @Autowired
     TestRestTemplate restTemplate;
     List<Inventory> inventories;
@@ -35,45 +36,82 @@ class GroceryapiApplicationTests {
      */
 
     @BeforeAll
-    public void init() {
+    public void addInventories() {
         inventories = createInventory();
-    }
-
-    // add inventories
-    @Test
-    void postInventories() {
         // post all inventories
-        url = url + "/inventories";
-//		inventories.forEach(inventory -> restTemplate.postForObject(url, inventory, Inventory.class));
-
         ResponseEntity<List<Inventory>> inventory = restTemplate.exchange(
-                url,
+                "/admin/add_inventories",
                 HttpMethod.POST,
                 new HttpEntity<>(inventories),
-                new ParameterizedTypeReference<List<Inventory>>() {
+                new ParameterizedTypeReference<>() {
                 }
         );
-//		 verify response
         assert Objects.requireNonNull(inventory.getBody()).size() == 3;
+    }
 
-//		restTemplate.get
+    @AfterAll
+    public void cleanInventories() {
+        restTemplate.delete("/admin/cleanup");
 
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<List<Inventory>> response = restTemplate.exchange(
+                "/admin/inventories",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                new ParameterizedTypeReference<>() {
+                }
+        );
+        List<Inventory> inventoryList = response.getBody();
+        assert Objects.requireNonNull(inventoryList).isEmpty();
     }
 
     @Test
     public void getInventories() {
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<List<Inventory>> response = restTemplate.exchange(
-                url + "/inventory",
+                "/admin/inventories",
                 HttpMethod.GET,
-                new HttpEntity<>(headers),
+                null,
                 new ParameterizedTypeReference<>() {
                 }
         );
-
         List<Inventory> inventoryList = response.getBody();
         assert !Objects.requireNonNull(inventoryList).isEmpty();
     }
+
+    @Test
+    public void updateInventory() {
+        Inventory update = new Inventory();
+        update.setPricePerItem(222);
+        update.setAvailableQnty(10);
+        update.setTotalQnty(1000);
+
+        restTemplate.put("/admin/put_inventory/1", update);
+
+        Inventory updated = restTemplate.exchange("/admin/inventorybyid/1",
+                HttpMethod.GET,
+                null,
+                Inventory.class).getBody();
+
+        assert Objects.requireNonNull(updated).getTotalQnty() == update.getTotalQnty();
+    }
+
+    @Test
+    public void deleteInventory() {
+        restTemplate.exchange(url + "del_inventory/1",
+                HttpMethod.DELETE,
+                new HttpEntity<>(null),
+                Void.class);
+
+        // try to get deleted item
+        ResponseEntity<Inventory> deletedItem = restTemplate.exchange(url + "/inventory/1",
+                HttpMethod.GET,
+                null,
+                Inventory.class);
+
+        assert deletedItem.getStatusCode().is4xxClientError();
+    }
+
 
     // create dummy data for inventory
     public static List<Inventory> createInventory() {

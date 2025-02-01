@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AdminService {
@@ -35,13 +36,30 @@ public class AdminService {
 
     @Transactional
     public Inventory updateGroceryItemInventory(Long id, Inventory updatedItem) {
-        updatedItem.setIdOfItem(id);
-        return inventoryRepository.save(updatedItem);
+        Optional<Inventory> toUpdate = inventoryRepository.findById(id);
+
+        if (toUpdate.isPresent()) {
+            Inventory tmp = toUpdate.get();
+
+            tmp.setTotalQnty(updatedItem.getTotalQnty());
+            tmp.setAvailableQnty(updatedItem.getAvailableQnty());
+            tmp.setPricePerItem(updatedItem.getPricePerItem());
+
+            return inventoryRepository.save(tmp);
+        }
+
+        return null;
     }
 
     public Inventory getInventory(String itemName) {
         Inventory inventory = inventoryRepository.findByItemName(itemName);
         return inventory;
+    }
+
+    public Inventory getById(Long id) {
+        Optional<Inventory> result = inventoryRepository.findById(id);
+
+        return result.orElse(null);
     }
 
     public Inventory addInventory(Inventory inventory) {
@@ -54,5 +72,9 @@ public class AdminService {
 
     public List<Inventory> getAllGroceryInventory() {
         return inventoryRepository.findAll();
+    }
+
+    public void removeAll() {
+        inventoryRepository.deleteAll();
     }
 }

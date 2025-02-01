@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/admin")
@@ -24,30 +24,33 @@ public class AdminControls {
     AdminService adminService;
 
     // view all inventory
-    @GetMapping("/inventory")
+    @GetMapping("/inventories")
     public ResponseEntity<List<Inventory>> viewAllItems() {
         return ResponseEntity.ok(adminService.getAllGroceryInventory());
     }
 
-    // add
-//    @PostMapping("items")
-//    public ResponseEntity<GroceryItem> addItem(@RequestBody GroceryItem groceryItem) {
-//
-//        GroceryItem toAdd = new GroceryItem();
-//        toAdd.setName(groceryItem.getName());
-//        toAdd.setQuantity(groceryItem.getQuantity());
-//        toAdd.setPrice(groceryItem.getPrice());
-//
-//        Inventory inventory = new Inventory();
-//        inventory.setIdOfItem(toAdd.getGroceryId());
-//        toAdd.setInventory(inventory);
-//
-//        GroceryItem addedItem = adminService.addGroceryItem(toAdd);
-//        return ResponseEntity.created(URI.create("/items")).body(addedItem);
-//    }
+    @GetMapping("/inventorybyname/{name}")
+    public ResponseEntity<Inventory> getSingleInventoryByName(@PathVariable String name) {
+        Optional<Inventory> inventory = Optional.ofNullable(adminService.getInventory(name));
+
+        if (inventory.isPresent())
+            return ResponseEntity.ok(adminService.getInventory(name));
+
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/inventorybyid/{id}")
+    public ResponseEntity<Inventory> getSingleInventoryById(@PathVariable Long id) {
+        Optional<Inventory> inventory = Optional.ofNullable(adminService.getById(id));
+
+        if (inventory.isPresent())
+            return ResponseEntity.ok(inventory.get());
+
+        return ResponseEntity.notFound().build();
+    }
 
     // add item to inventory
-    @PostMapping("/inventory")
+    @PostMapping("/add_inventory")
     public ResponseEntity<Inventory> addInventory(@RequestBody Inventory inventory) {
         return ResponseEntity
                 .created(URI.create("/inventory"))
@@ -55,7 +58,7 @@ public class AdminControls {
     }
 
     // add multiple items to inventory
-    @PostMapping("/inventories")
+    @PostMapping("/add_inventories")
     public ResponseEntity<List<Inventory>> addInventories(@RequestBody List<Inventory> inventories) {
         return ResponseEntity
                 .created(URI.create("/inventory"))
@@ -63,21 +66,26 @@ public class AdminControls {
     }
 
     // remove item from inventory
-    @DeleteMapping("/inventory/{id}")
+    @DeleteMapping("/del_inventory/{id}")
     public void deleteItem(@PathVariable Long id) {
         adminService.removeGroceryItem(id);
     }
 
-    // update
-    @PutMapping("inventory/{id}")
-    public Inventory updateItem(@PathVariable Long id,
-                                  @RequestBody Inventory groceryItem) {
-        return adminService.updateGroceryItemInventory(id, groceryItem);
+    // remove all inventories
+    @DeleteMapping("/cleanup")
+    public void deleteAll() {
+        adminService.removeAll();
     }
 
-    // manage inventory
-    @PatchMapping("inventory/{name}")
-    public void getInventory(@PathVariable String name) {
-        adminService.getInventory(name);
+    // update
+    @PutMapping("/put_inventory/{id}")
+    public ResponseEntity<Inventory> updateItem(@PathVariable Long id,
+                                  @RequestBody Inventory groceryItem) {
+        Inventory updated = adminService.updateGroceryItemInventory(id, groceryItem);
+        if (updated != null) {
+            return ResponseEntity.accepted().body(updated);
+        }
+
+        return ResponseEntity.badRequest().build();
     }
 }
