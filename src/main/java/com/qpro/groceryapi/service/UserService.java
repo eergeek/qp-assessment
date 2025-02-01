@@ -1,9 +1,9 @@
 package com.qpro.groceryapi.service;
 
 import com.qpro.groceryapi.model.GroceryItem;
-import com.qpro.groceryapi.model.Order;
-import com.qpro.groceryapi.repository.GroceryRepository;
-import com.qpro.groceryapi.repository.OrderRepository;
+import com.qpro.groceryapi.model.GroceryOrder;
+import com.qpro.groceryapi.repository.GroceryItemRepository;
+import com.qpro.groceryapi.repository.GroceryOrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,18 +12,18 @@ import java.util.List;
 @Service
 public class UserService {
     @Autowired
-    GroceryRepository groceryRepository;
+    GroceryItemRepository groceryItemRepository;
 
     @Autowired
-    OrderRepository orderRepository;
+    GroceryOrderRepository orderRepository;
 
     public List<GroceryItem> getAvailableGroceryItems() {
-        return groceryRepository.findAll();
+        return groceryItemRepository.findAll();
     }
 
-    public Order bookGroceriesOrder(List<GroceryItem> items) {
-        Order order = new Order();
-        order.setGroceryItems(items);
-        return orderRepository.save(order);
+    public GroceryOrder bookGroceriesOrder(List<GroceryItem> items) {
+        GroceryOrder groceryOrder = new GroceryOrder();
+        groceryOrder.setItems(items);
+        return orderRepository.save(groceryOrder);
     }
 }

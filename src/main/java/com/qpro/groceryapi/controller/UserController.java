@@ -1,7 +1,7 @@
 package com.qpro.groceryapi.controller;
 
 import com.qpro.groceryapi.model.GroceryItem;
-import com.qpro.groceryapi.model.Order;
+import com.qpro.groceryapi.model.GroceryOrder;
 import com.qpro.groceryapi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +25,7 @@ public class UserController {
 
     // book order
     @GetMapping("/order")
-    public Order bookOrder(@RequestBody List<GroceryItem> items) {
+    public GroceryOrder bookOrder(@RequestBody List<GroceryItem> items) {
         return userService.bookGroceriesOrder(items);
     }
 }

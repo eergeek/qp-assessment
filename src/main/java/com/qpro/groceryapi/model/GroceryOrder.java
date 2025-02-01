@@ -7,12 +7,12 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "grocery_order")
-public class Order {
+@Table(name = "g_order")
+public class GroceryOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
 
-    @ManyToMany
-    private List<GroceryItem> groceryItems;
+    @OneToMany(mappedBy = "groceryOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<GroceryItem> items;
 }
