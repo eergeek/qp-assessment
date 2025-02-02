@@ -96,7 +96,7 @@ class AdminActionsTest {
 
     @Test
     public void deleteInventory() {
-        restTemplate.exchange("/admin/del_inventory/1",
+        restTemplate.exchange("/admin/del_inventory/2",
                 HttpMethod.DELETE,
                 new HttpEntity<>(null),
                 Void.class);

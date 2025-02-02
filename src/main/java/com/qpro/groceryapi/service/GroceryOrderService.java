@@ -51,14 +51,16 @@ public class GroceryOrderService {
         GroceryOrder order = groceryOrderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        for (GroceryItem item : order.getItems()) {
+        List<GroceryItem> itemList = orderItemRepository.findByGroceryOrder_orderId(order.getOrderId());
+        for (GroceryItem item : itemList) {
             // Update inventory
-            Inventory inventory = item.getInventory();
+            Inventory inventory = inventoryRepository.findByItemName(item.getName());
             int availableQnty = inventory.getAvailableQnty() + item.getQuantity();
             inventory.setAvailableQnty(availableQnty);
             inventoryRepository.save(inventory);
         }
 
+//        orderItemRepository.deleteAllById(itemList.stream().map(GroceryItem::getGroceryId).toList());
         groceryOrderRepository.delete(order);
     }
 
@@ -119,4 +121,12 @@ public class GroceryOrderService {
         return groceryOrderRepository.getReferenceById(id);
     }
 
+    public GroceryOrder updateOrder(long id, List<GroceryItem> updatedList) {
+        GroceryOrder order = groceryOrderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        order.getItems().clear();
+        order.getItems().addAll(updatedList);
+        return groceryOrderRepository.save(order);
+    }
 }

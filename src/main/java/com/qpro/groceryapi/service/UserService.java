@@ -50,4 +50,12 @@ public class UserService {
         GroceryOrder groceryOrder = service.createOrder(items);;
         return groceryOrder.getOrderId();
     }
+
+    public void deleteOrderById(long id) {
+        service.removeOrder(id);
+    }
+
+    public GroceryOrder updateOrder(long id, List<GroceryItem> updatedList) {
+        return service.updateOrder(id, updatedList);
+    }
 }

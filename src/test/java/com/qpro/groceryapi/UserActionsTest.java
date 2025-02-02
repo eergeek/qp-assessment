@@ -1,6 +1,7 @@
 package com.qpro.groceryapi;
 
 import com.qpro.groceryapi.model.GroceryItem;
+import com.qpro.groceryapi.model.GroceryOrder;
 import com.qpro.groceryapi.model.Inventory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -64,6 +66,49 @@ public class UserActionsTest {
         // get ack
         assert orderId.getBody() != null;
         // can view order items
+    }
+
+    @Test
+    public void userCanDeleteGroceryOrderTest() {
+        ResponseEntity<Void> response = restTemplate.exchange("/user/rmorder/1",
+                HttpMethod.DELETE,
+                null,
+                Void.class);
+        assert response.getStatusCode().is4xxClientError();
+    }
+
+    @Test
+    public void userCanUpdateGroceryOrder() {
+        // make list of items want to book
+        GroceryItem tomato = new GroceryItem();
+        tomato.setName("tomato");
+        tomato.setQuantity(10);
+
+        GroceryItem potato = new GroceryItem();
+        potato.setName("potato");
+        potato.setQuantity(20);
+        // make order of them
+        List<GroceryItem> items = new ArrayList<>(List.of(potato, tomato));
+        // send order (i want this order of items)
+        ResponseEntity<Long> orderId = restTemplate.exchange("/user/order",
+                HttpMethod.POST,
+                new HttpEntity<>(items),
+                Long.class);
+        // get ack
+        assert orderId.getBody() != null;
+
+        // remove potato
+        long id = orderId.getBody();
+        items.remove(1);
+        items.get(0).setQuantity(25);
+
+        ResponseEntity<GroceryOrder> updated = restTemplate.exchange("/user/orderupdate/" + id,
+                HttpMethod.PUT,
+                new HttpEntity<>(items),
+                GroceryOrder.class);
+
+        assert updated.getBody() != null;
+        assert updated.getBody().getItems().get(0).getQuantity() == 25;
     }
 
     @BeforeAll
