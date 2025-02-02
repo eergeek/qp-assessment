@@ -25,8 +25,6 @@ class AdminActionsTest {
     @Autowired
     TestRestTemplate restTemplate;
     List<Inventory> inventories;
-    String url = "/admin";
-
     /**
      * - Add new grocery items to the system
      *   - View existing grocery items
@@ -98,13 +96,13 @@ class AdminActionsTest {
 
     @Test
     public void deleteInventory() {
-        restTemplate.exchange(url + "del_inventory/1",
+        restTemplate.exchange("/admin/del_inventory/1",
                 HttpMethod.DELETE,
                 new HttpEntity<>(null),
                 Void.class);
 
         // try to get deleted item
-        ResponseEntity<Inventory> deletedItem = restTemplate.exchange(url + "/inventory/1",
+        ResponseEntity<Inventory> deletedItem = restTemplate.exchange("/admin/inventory/1",
                 HttpMethod.GET,
                 null,
                 Inventory.class);

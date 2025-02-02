@@ -34,7 +34,7 @@ public class GroceryOrderService {
         for (GroceryItem item : items) {
             item.setGroceryOrder(order);
 
-            Inventory inventory = item.getInventory();
+            Inventory inventory = inventoryRepository.findByItemName(item.getName());
             int availableQnty = inventory.getAvailableQnty() - item.getQuantity();
             if (availableQnty < 0) {
                 throw new RuntimeException("Not enough stock for item: " + inventory.getItemName());
