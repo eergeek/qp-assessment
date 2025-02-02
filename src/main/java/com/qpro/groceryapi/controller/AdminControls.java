@@ -1,7 +1,10 @@
 package com.qpro.groceryapi.controller;
 
+import com.qpro.groceryapi.ListWrapper;
 import com.qpro.groceryapi.model.Inventory;
+import com.qpro.groceryapi.model.User;
 import com.qpro.groceryapi.service.AdminService;
+import com.qpro.groceryapi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +25,9 @@ import java.util.Optional;
 public class AdminControls {
     @Autowired
     AdminService adminService;
+
+    @Autowired
+    UserService userService;
 
     // view all inventory
     @GetMapping("/inventories")
@@ -59,10 +65,12 @@ public class AdminControls {
 
     // add multiple items to inventory
     @PostMapping("/add_inventories")
-    public ResponseEntity<List<Inventory>> addInventories(@RequestBody List<Inventory> inventories) {
+    public ResponseEntity<ListWrapper<Inventory>> addInventories(@RequestBody List<Inventory> inventories) {
+        ListWrapper<Inventory> listWrapper = new ListWrapper<>();
+        listWrapper.setWrappedList(adminService.addMultipleInventory(inventories));
         return ResponseEntity
                 .created(URI.create("/inventory"))
-                .body(adminService.addMultipleInventory(inventories));
+                .body(listWrapper);
     }
 
     // remove item from inventory
@@ -87,5 +95,18 @@ public class AdminControls {
         }
 
         return ResponseEntity.badRequest().build();
+    }
+
+    // add user
+    @PostMapping("/addusers")
+    public ResponseEntity<ListWrapper<User>> addUsers(@RequestBody ListWrapper<User> users) {
+        List<User> addedUsers = userService.addUsers(users.getWrappedList());
+
+        if (addedUsers.isEmpty())
+            return ResponseEntity.badRequest().build();
+
+        ListWrapper<User> wrapper = new ListWrapper<>();
+        wrapper.setWrappedList(addedUsers);
+        return ResponseEntity.ok(wrapper);
     }
 }

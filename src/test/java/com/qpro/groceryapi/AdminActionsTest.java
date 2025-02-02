@@ -25,6 +25,7 @@ class AdminActionsTest {
     @Autowired
     TestRestTemplate restTemplate;
     List<Inventory> inventories;
+    HttpHeaders headers;
     /**
      * - Add new grocery items to the system
      *   - View existing grocery items
@@ -36,22 +37,29 @@ class AdminActionsTest {
     @BeforeAll
     public void addInventories() {
         inventories = createInventory();
+        headers = new HttpHeaders();
+        headers.setBasicAuth("admin", "admin");
         // post all inventories
-        ResponseEntity<List<Inventory>> inventory = restTemplate.exchange(
+        ResponseEntity<ListWrapper> inventory = restTemplate.exchange(
                 "/admin/add_inventories",
                 HttpMethod.POST,
-                new HttpEntity<>(inventories),
-                new ParameterizedTypeReference<>() {
-                }
+                new HttpEntity<>(inventories, headers),
+                ListWrapper.class
         );
-        assert Objects.requireNonNull(inventory.getBody()).size() == 3;
+
+        assert Objects.requireNonNull(inventory.getBody().getWrappedList()).size() == 3;
     }
 
     @AfterAll
     public void cleanInventories() {
-        restTemplate.delete("/admin/cleanup");
-
         HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth("admin", "admin");
+
+        restTemplate.exchange("/admin/cleanup",
+                HttpMethod.DELETE,
+                new HttpEntity<>(headers),
+                Void.class);
+
         ResponseEntity<List<Inventory>> response = restTemplate.exchange(
                 "/admin/inventories",
                 HttpMethod.GET,
@@ -66,10 +74,11 @@ class AdminActionsTest {
     @Test
     public void getInventories() {
         HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth("admin", "admin");
         ResponseEntity<List<Inventory>> response = restTemplate.exchange(
                 "/admin/inventories",
                 HttpMethod.GET,
-                null,
+                new HttpEntity<>(headers),
                 new ParameterizedTypeReference<>() {
                 }
         );
@@ -84,11 +93,14 @@ class AdminActionsTest {
         update.setAvailableQnty(10);
         update.setTotalQnty(1000);
 
-        restTemplate.put("/admin/put_inventory/1", update);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth("admin", "admin");
+
+        restTemplate.put("/admin/put_inventory/1", new HttpEntity<>(update, headers));
 
         Inventory updated = restTemplate.exchange("/admin/inventorybyid/1",
                 HttpMethod.GET,
-                null,
+                new HttpEntity<>(headers),
                 Inventory.class).getBody();
 
         assert Objects.requireNonNull(updated).getTotalQnty() == update.getTotalQnty();
@@ -96,15 +108,17 @@ class AdminActionsTest {
 
     @Test
     public void deleteInventory() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBasicAuth("admin", "admin");
         restTemplate.exchange("/admin/del_inventory/2",
                 HttpMethod.DELETE,
-                new HttpEntity<>(null),
+                new HttpEntity<>(headers),
                 Void.class);
 
         // try to get deleted item
         ResponseEntity<Inventory> deletedItem = restTemplate.exchange("/admin/inventory/1",
                 HttpMethod.GET,
-                null,
+                new HttpEntity<>(headers),
                 Inventory.class);
 
         assert deletedItem.getStatusCode().is4xxClientError();

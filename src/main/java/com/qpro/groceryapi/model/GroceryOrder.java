@@ -15,4 +15,8 @@ public class GroceryOrder {
 
     @OneToMany(mappedBy = "groceryOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<GroceryItem> items;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private User user;
 }

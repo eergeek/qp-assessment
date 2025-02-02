@@ -3,9 +3,11 @@ package com.qpro.groceryapi.service;
 import com.qpro.groceryapi.model.GroceryItem;
 import com.qpro.groceryapi.model.GroceryOrder;
 import com.qpro.groceryapi.model.Inventory;
+import com.qpro.groceryapi.model.User;
 import com.qpro.groceryapi.repository.GroceryItemRepository;
 import com.qpro.groceryapi.repository.GroceryOrderRepository;
 import com.qpro.groceryapi.repository.InventoryRepository;
+import com.qpro.groceryapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,10 +28,16 @@ public class GroceryOrderService {
     @Autowired
     private InventoryRepository inventoryRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Transactional
-    public GroceryOrder createOrder(List<GroceryItem> items) {
+    public GroceryOrder createOrder(List<GroceryItem> items, String username) {
         GroceryOrder order = new GroceryOrder();
         order.setItems(items);
+
+        User user = userRepository.findByusername(username);
+        order.setUser(user);
 
         for (GroceryItem item : items) {
             item.setGroceryOrder(order);

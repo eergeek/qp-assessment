@@ -16,8 +16,8 @@ public class GroceryOrderController {
     private GroceryOrderService groceryOrderService;
 
     @PostMapping
-    public GroceryOrder createOrder(@RequestBody List<GroceryItem> items) {
-        return groceryOrderService.createOrder(items);
+    public GroceryOrder createOrder(@RequestBody List<GroceryItem> items, String userName) {
+        return groceryOrderService.createOrder(items, userName);
     }
 
     @GetMapping("/{id}")

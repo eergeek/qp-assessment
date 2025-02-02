@@ -32,9 +32,9 @@ public class UserController {
     }
 
     // book order
-    @PostMapping("/order")
-    public ResponseEntity<Long> bookOrder(@RequestBody List<GroceryItem> items) {
-        Long id = userService.bookGroceriesOrder(items);
+    @PostMapping("/order/{username}")
+    public ResponseEntity<Long> bookOrder(@RequestBody List<GroceryItem> items, @PathVariable String username) {
+        Long id = userService.bookGroceriesOrder(items, username);
         return ResponseEntity.ok(id);
     }
 

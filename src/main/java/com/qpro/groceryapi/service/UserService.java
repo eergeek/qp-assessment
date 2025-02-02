@@ -3,11 +3,12 @@ package com.qpro.groceryapi.service;
 import com.qpro.groceryapi.model.GroceryItem;
 import com.qpro.groceryapi.model.GroceryOrder;
 import com.qpro.groceryapi.model.Inventory;
-import com.qpro.groceryapi.repository.GroceryItemRepository;
-import com.qpro.groceryapi.repository.GroceryOrderRepository;
+import com.qpro.groceryapi.model.User;
 import com.qpro.groceryapi.repository.InventoryRepository;
+import com.qpro.groceryapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.function.Function;
@@ -16,16 +17,13 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
     @Autowired
-    GroceryItemRepository groceryItemRepository;
-
-    @Autowired
     InventoryRepository inventoryRepository;
 
     @Autowired
-    GroceryOrderRepository orderRepository;
+    GroceryOrderService service;
 
     @Autowired
-    GroceryOrderService service;
+    UserRepository userRepository;
 
     public List<GroceryItem> getAvailableGroceryItems() {
         List<Inventory> list = inventoryRepository.findAll();
@@ -46,8 +44,10 @@ public class UserService {
                 .map(mapToGroceryItem).collect(Collectors.toList());
     }
 
-    public long bookGroceriesOrder(List<GroceryItem> items) {
-        GroceryOrder groceryOrder = service.createOrder(items);;
+    @Transactional
+    public long bookGroceriesOrder(List<GroceryItem> items, String userName) {
+        GroceryOrder groceryOrder = service.createOrder(items, userName);
+
         return groceryOrder.getOrderId();
     }
 
@@ -57,5 +57,13 @@ public class UserService {
 
     public GroceryOrder updateOrder(long id, List<GroceryItem> updatedList) {
         return service.updateOrder(id, updatedList);
+    }
+
+    public User addUser(User user) {
+        return userRepository.save(user);
+    }
+
+    public List<User> addUsers(List<User> users) {
+        return userRepository.saveAll(users);
     }
 }
